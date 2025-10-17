@@ -1,14 +1,20 @@
 import { useState, useRef, useEffect } from 'react';
+import Plot from 'react-plotly.js';
 
 export default function App() {
   let [location, setLocation] = useState("");
   let [cars, setCars] = useState([]);
   let [simSpeed, setSimSpeed] = useState(10);
   let [car1Position, setCar1Position] = useState(null);
+  let [xValues, setXValues] = useState([]);
+  let [yValues, setYValues] = useState([]);
   const running = useRef(null);
 
   let setup = () => {
     console.log("Hola");
+    setXValues([]);
+    setYValues([]);
+    
     fetch("http://localhost:8000/simulations", {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -30,6 +36,8 @@ export default function App() {
         const car1 = data["cars"].find(car => car.id === 1);
         if (car1) {
           setCar1Position(car1.pos);
+          setXValues(prev => [...prev, prev.length]);
+          setYValues(prev => [...prev, car1.vel[0]]);
         }
       });
     }, 1000 / simSpeed);
@@ -62,6 +70,21 @@ export default function App() {
           Posición del Carro 1: X = {car1Position[0]}, Y = {car1Position[1]}
         </div>
       )}
+      <Plot
+        data={[
+          {
+            x: xValues,
+            y: yValues,
+            type: 'scatter',
+            mode: 'lines',
+            line: { color: 'blue' }
+          }
+        ]}
+        layout={{
+          width: 320,
+          height: 240
+        }}
+      />
       <svg width="800" height="500" xmlns="http://www.w3.org/2000/svg" style={{backgroundColor:"white"}}>
 
       <rect x={0} y={200} width={800} height={80} style={{fill: "darkgray"}}></rect>

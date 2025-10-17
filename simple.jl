@@ -2,6 +2,15 @@ using Agents, Random
 using StaticArrays: SVector
 using Distributions: Uniform
 
+function car_ahead(agent, model)
+    for neighbor in nearby_agents(agent, model, 1.0)
+        if neighbor.pos[1] > agent.pos[1]
+            return neighbor
+        end
+    end
+    nothing
+end
+
 @agent struct Car(ContinuousAgent{2,Float64})
     accelerating::Bool = true
 end
@@ -9,15 +18,13 @@ end
 accelerate(agent) = agent.vel[1] + 0.05
 decelerate(agent) = agent.vel[1] - 0.1
 
-function  agent_step!(agent, model)
-    new_velocity = agent.accelerating ? accelerate(agent) : decelerate(agent)
+function agent_step!(agent, model)
+    new_velocity = isnothing(car_ahead(agent, model)) ? accelerate(agent) : decelerate(agent)
 
     if new_velocity >= 1.0
         new_velocity = 1.0
-        agent.accelerating = false
     elseif new_velocity <= 0.0
         new_velocity = 0.0
-        agent.accelerating = true
     end
     
     agent.vel = (new_velocity, 0.0)
