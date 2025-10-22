@@ -11,23 +11,34 @@ end
 
 const GREEN_TIME = 10
 const YELLOW_TIME = 4
-const CYCLE_TIME = 2 * (GREEN_TIME + YELLOW_TIME)
+const RED_TIME = 14
+const CYCLE_TIME = 28
 
 function agent_step!(agent::TrafficLight, model)
-    agent.timer += 1
+    props = abmproperties(model)
+    props[:step] += 1
+    tiempo = props[:step]
+    
+    cycle_time = mod(tiempo - 1, CYCLE_TIME)
     
     if agent.orientation == :horizontal
-        cycle_position = mod(agent.timer, CYCLE_TIME)
+        if cycle_time < GREEN_TIME
+            agent.color = GREEN
+        elseif cycle_time < GREEN_TIME + YELLOW_TIME
+            agent.color = YELLOW
+        else
+            agent.color = RED
+        end
+
     else
-        cycle_position = mod(agent.timer + CYCLE_TIME ÷ 2, CYCLE_TIME)
-    end
-    
-    if cycle_position < GREEN_TIME
-        agent.color = GREEN
-    elseif cycle_position < GREEN_TIME + YELLOW_TIME
-        agent.color = YELLOW
-    else
-        agent.color = RED
+
+        if cycle_time < GREEN_TIME + YELLOW_TIME
+            agent.color = RED
+        elseif cycle_time < GREEN_TIME + YELLOW_TIME + GREEN_TIME
+            agent.color = GREEN
+        elseif cycle_time < CYCLE_TIME
+            agent.color = YELLOW
+        end
     end
 end
 
@@ -44,8 +55,8 @@ function initialize_model(extent = (25, 25))
         space2d;
         properties = properties,
         rng, 
-        agent_step!, 
-        scheduler = Schedulers.Randomly()
+        agent_step!,
+        scheduler = Schedulers.ByID()
     )
 
     add_agent!(
@@ -53,7 +64,7 @@ function initialize_model(extent = (25, 25))
         TrafficLight,
         model;
         color = GREEN,
-        timer = 100,
+        timer = 0,
         orientation = :horizontal,
         vel = SVector(0.0, 0.0)
     )

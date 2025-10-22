@@ -75,8 +75,8 @@ export default function App() {
               color = "#808080";
           }
 
-          const x = isHorizontal ? 350 : 385;
-          const y = isHorizontal ? 385 : 350;
+          const x = isHorizontal ? 355 : 385;
+          const y = isHorizontal ? 385 : 355;
 
           return (
             <rect 
@@ -85,7 +85,7 @@ export default function App() {
               y={y}
               width={30}
               height={30}
-              style={{fill: color, stroke: "black", strokeWidth: 1}}
+              style={{fill: color}}
             />
           );
         })}
