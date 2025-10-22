@@ -1,4 +1,4 @@
-include("simple.jl")
+include("traffic_lights.jl")
 using Genie, Genie.Renderer.Json, Genie.Requests, HTTP
 using UUIDs
 
@@ -11,24 +11,45 @@ route("/simulations", method = POST) do
     id = string(uuid1())
     instances[id] = model
 
-    cars = []
-    for car in allagents(model)
-        push!(cars, car)
+    lights = []
+    for light in allagents(model)
+        light_data = Dict(
+            "id" => light.id,
+            "pos" => light.pos,
+            "color" => string(light.color),
+            "orientation" => string(light.orientation)
+        )
+        println("Light data: ", light_data)
+        push!(lights, light_data)
     end
     
-    json(Dict("Location" => "/simulations/$id", "cars" => cars))
+    response = Dict("Location" => "/simulations/$id", "lights" => lights)
+    println("Sending response: ", response)
+    json(response)
 end
 
 route("/simulations/:id") do
-    println(payload(:id))
-    model = instances[payload(:id)]
+    id = payload(:id)
+    println("Received GET request for simulation: ", id)
+    
+    model = instances[id]
     run!(model, 1)
-    cars = []
-    for car in allagents(model)
-        push!(cars, car)
+    
+    lights = []
+    for light in allagents(model)
+        light_data = Dict(
+            "id" => light.id,
+            "pos" => light.pos,
+            "color" => string(light.color),
+            "orientation" => string(light.orientation)
+        )
+        println("Updated light data: ", light_data)
+        push!(lights, light_data)
     end
     
-    json(Dict("cars" => cars))
+    response = Dict("lights" => lights)
+    println("Sending update response: ", response)
+    json(response)
 end
 
 
