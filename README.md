@@ -132,3 +132,75 @@ La función `initialize_model` configura:
 4. Dos semáforos en posiciones opuestas de la intersección
    - El horizontal comienza en verde
    - El vertical comienza en rojo
+
+## Monitoreo de Velocidad y Visualización
+
+### Cambios en el Backend (webapi.jl)
+
+Se implementó el seguimiento de velocidad promedio de los autos:
+
+```julia
+# Cálculo de velocidad promedio en la respuesta
+avg_speed = length(cars) > 0 ? mean([c["vel"][1] for c in cars]) : 0.0
+
+response = Dict(
+    "lights" => lights,
+    "cars" => cars,
+    "avg_speed" => avg_speed,  # Nueva métrica
+    "step" => abmproperties(model)[:step]
+)
+```
+
+Mejoras implementadas:
+- Seguimiento del número de paso de simulación
+- Cálculo de velocidad promedio de todos los autos
+- Soporte para múltiples autos (configurables desde el frontend)
+
+### Mejoras en la Interfaz (App.jsx)
+
+#### Nuevos Estados
+```javascript
+let [cars, setCars] = useState([]);
+let [numCars, setNumCars] = useState(1);
+let [speedHistory, setSpeedHistory] = useState([]);
+let [currentStep, setCurrentStep] = useState(0);
+```
+
+#### Visualización de Datos
+Se agregó una gráfica de velocidad usando react-plotly.js:
+```javascript
+const speedData = {
+    x: speedHistory.map(h => h.step),
+    y: speedHistory.map(h => h.avgSpeed),
+    type: 'scatter',
+    mode: 'lines+markers',
+    name: 'Velocidad Promedio'
+};
+```
+
+#### Nuevas Características
+1. **Control de Simulación**
+   - Selector de número de autos (1-10)
+   - Control de velocidad de simulación
+   - Botones de setup/start/stop mejorados
+
+2. **Panel de Monitoreo**
+   - Gráfica en tiempo real de velocidad
+   - Rango de velocidad: 0 a 1.1 (normalizado)
+   - Actualización automática con cada paso
+
+3. **Mejoras Visuales**
+   - Layout de dos paneles (simulación y monitoreo)
+   - Estilización mejorada de la interfaz
+   - Mejor visualización de semáforos y autos
+
+### Funcionamiento
+1. Al iniciar la simulación, se configura con el número deseado de autos
+2. En cada paso:
+   - Se actualiza la posición y estado de cada agente
+   - Se calcula y registra la velocidad promedio
+   - Se actualiza la gráfica en tiempo real
+3. La visualización permite observar:
+   - El impacto de los semáforos en la velocidad
+   - Patrones de aceleración y frenado
+   - Comportamiento del sistema con diferentes números de autos

@@ -1,6 +1,7 @@
 include("traffic_simulation.jl")
 using Genie, Genie.Renderer.Json, Genie.Requests, HTTP
 using UUIDs
+using Statistics
 
 instances = Dict()
 
@@ -37,10 +38,15 @@ route("/simulations", method = POST) do
         end
     end
     
+    # Calcular velocidad promedio inicial
+    avg_speed = length(cars) > 0 ? mean([c["vel"][1] for c in cars]) : 0.0
+    
     response = Dict(
         "Location" => "/simulations/$id",
         "lights" => lights,
-        "cars" => cars
+        "cars" => cars,
+        "avg_speed" => avg_speed,
+        "step" => 0
     )
     println("Sending response: ", response)
     json(response)
@@ -48,7 +54,6 @@ end
 
 route("/simulations/:id") do
     id = payload(:id)
-    println("Received GET request for simulation: ", id)
     
     model = instances[id]
     run!(model, 1)
@@ -76,9 +81,14 @@ route("/simulations/:id") do
         end
     end
     
+    # Calcular velocidad promedio
+    avg_speed = length(cars) > 0 ? mean([c["vel"][1] for c in cars]) : 0.0
+    
     response = Dict(
         "lights" => lights,
-        "cars" => cars
+        "cars" => cars,
+        "avg_speed" => avg_speed,
+        "step" => abmproperties(model)[:step]
     )
     json(response)
 end
