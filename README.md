@@ -204,3 +204,7 @@ const speedData = {
    - El impacto de los semáforos en la velocidad
    - Patrones de aceleración y frenado
    - Comportamiento del sistema con diferentes números de autos
+
+### Reflexiones individuales
+- Shirel Marino: Esta actividad ha sido una experiencia bastante interesante que me ha permitido profundizar en la implementación de sistemas multiagente y su visualización interactiva. El proceso de desarrollar la simulación de tráfico me ayudó a comprender mejor la importancia de la sincronización entre agentes diferentes (semáforos y autos) y cómo las decisiones de diseño afectan el comportamiento del sistema. Además, la integración de herramientas de visualización y monitoreo en tiempo real me ha dado una nueva perspectiva sobre la importancia de la retroalimentación visual en sistemas complejos. Esta experiencia ha fortalecido mis habilidades en Julia y React, mientras me ha mostrado el potencial de los sistemas multiagente para modelar situaciones del mundo real ademas de que pude entender mejor como dos agentes pueden interactuar.
+- Nancy Reyes:
